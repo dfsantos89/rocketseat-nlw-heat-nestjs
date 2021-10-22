@@ -2,10 +2,6 @@ import { Body, Controller, Get, Post, Query, Redirect } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { AppService } from './app.service';
 
-type GithubResponse = {
-  url: string;
-};
-
 class AuthenticateDto {
   code: string;
 }
@@ -24,19 +20,22 @@ export class AppController {
 
   @Get('github')
   @Redirect()
-  github() : GithubResponse {
-    const client_id = this.configService.get<string>('GITHUB_CLIENT_ID');
-
-    return { url: `https://github.com/login/oauth/authorize?client_id=${client_id}` };
+  github() {
+    return { 
+      url: `https://github.com/login/oauth/authorize?client_id=${this.configService.get<string>('GITHUB_CLIENT_ID')}`
+    };
   }
 
   @Get('signin/callback')
   authorizeCallback(@Query('code') code: string) {
-    
+    return code;
   }
 
-  @Post('authenticate')
-  authenticate(@Body() auth :AuthenticateDto) {
-    return this.appService.authenticateUser(auth.code);
+  // @Post('authenticate')
+  @Get('authenticate')
+  // authenticate(@Body() auth :AuthenticateDto) {
+  authenticate(@Query('code') code: string) {
+    // return this.appService.authenticateUser(auth.code);
+    return this.appService.authenticateUser(code);
   }
 }
